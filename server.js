@@ -1,14 +1,11 @@
+require('dotenv').config();
 const express = require('express');
-const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const cors = require('cors');
 const connectDB = require('./config/db');
-
-//Load dotenv vars
-dotenv.config({ path: './config/config.env' });
 
 //connect to database
 connectDB();
