@@ -19,11 +19,23 @@ exports.register = async (req, res, next) => {
 
         res.status(200).json({ success: true, token });
     } catch (err) {
-        console.log(err.message.red);
+        // console.log(err.message.red);
+        const error = err.message.split(':');
+        console.log(error);
+        let Error;
+        if (error.length == 4) {
+            Error = 'Please add a valid email & password. Password is shorter than the minimum allowed length (8)';
+        } else if (error.includes(' password')) {
+            Error = 'Password is shorter than the minimum allowed length (8)';
+        } else if (error.includes(' email')) {
+            Error = 'Please add a valid email';
+        } else {
+            Error = err.message;
+        }
 
         res.status(400).json({
             success: false,
-            message: err.message,
+            message: Error,
         });
     }
 };
