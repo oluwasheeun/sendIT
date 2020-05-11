@@ -24,7 +24,8 @@ exports.register = async (req, res, next) => {
         console.log(error);
         let Error;
         if (error.length == 4) {
-            Error = 'Please add a valid email & password. Password is shorter than the minimum allowed length (8)';
+            Error =
+                'Please add a valid email & password. Password is shorter than the minimum allowed length (8)';
         } else if (error.includes(' password')) {
             Error = 'Password is shorter than the minimum allowed length (8)';
         } else if (error.includes(' email')) {

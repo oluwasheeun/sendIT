@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema({
+    description: {
+        type: String,
+        required: [true, 'Please add a description'],
+    },
     pickupLocation: {
         type: String,
         required: [true, 'Please add an address'],
@@ -32,9 +36,7 @@ const OrderSchema = new mongoose.Schema({
     },
     presentLocation: {
         type: String,
-
     },
 });
-
 
 module.exports = mongoose.model('Order', OrderSchema);
