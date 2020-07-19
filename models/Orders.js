@@ -1,42 +1,48 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
+const db = require('../config/db');
 
-const OrderSchema = new mongoose.Schema({
-    description: {
-        type: String,
-        required: [true, 'Please add a description'],
+const Order = db.define('orders', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+  },
+  description: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  pickupLocation: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  destination: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  recipientName: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  phone: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  user: {
+    type: Sequelize.UUID,
+    allowNull: false,
+  },
+  status: {
+    type: Sequelize.ENUM('In-Transit', 'Delivered'),
+    defaultValue: 'In-Transit',
+    validate: {
+      isIn: [['In-Transit', 'Delivered']],
     },
-    pickupLocation: {
-        type: String,
-        required: [true, 'Please add an address'],
-    },
-    destination: {
-        type: String,
-        required: [true, 'Please add an address'],
-    },
-    recipientName: {
-        type: String,
-        required: [true, 'Please add a name'],
-        trim: true,
-        maxlength: [50, 'Name can not be more than 50 characters'],
-    },
-    phone: {
-        type: String,
-        required: true,
-        maxlength: [20, 'Phone number can not be longer than 20 characters'],
-    },
-    user: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        required: true,
-    },
-    status: {
-        type: String,
-        enum: ['In-Transit', 'Delivered', 'Cancelled'],
-        default: 'In-Transit',
-    },
-    presentLocation: {
-        type: String,
-    },
+  },
+  presentLocation: {
+    type: Sequelize.STRING,
+  },
 });
 
-module.exports = mongoose.model('Order', OrderSchema);
+Order.sync().then(() => console.log('table created'));
+
+module.exports = Order;

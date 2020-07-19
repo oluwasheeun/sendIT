@@ -3,45 +3,45 @@ const User = require('../models/Users');
 
 //Protect routes
 exports.protect = async (req, res, next) => {
-    let token;
+  let token;
 
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
-        token = req.headers.authorization.split(' ')[1];
-    }
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
-    if (!token) {
-        return res.status(401).json({
-            message: 'Not authorize to access this route',
-        });
-    }
+  if (!token) {
+    return res.status(401).json({
+      message: 'Not authorize to access this route',
+    });
+  }
 
-    try {
-        //verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  try {
+    //verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        console.log(decoded);
+    console.log(decoded);
 
-        req.user = await User.findById(decoded.id);
+    req.user = await User.findByPk(decoded.id);
 
-        next();
-    } catch (err) {
-        return res.status(401).json({
-            message: 'Not authorize to access this routee',
-        });
-    }
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      message: 'Not authorize to access this routee',
+    });
+  }
 };
 
 //Grant access to specific roles
 exports.authorize = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            return res.status(403).json({
-                message: `User role ${req.user.role} is not authorized to access this route`,
-            });
-        }
-        next();
-    };
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: `User role ${req.user.role} is not authorized to access this route`,
+      });
+    }
+    next();
+  };
 };

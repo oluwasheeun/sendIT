@@ -5,10 +5,14 @@ const colors = require('colors');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const cors = require('cors');
-const connectDB = require('./config/db');
 
-//connect to database
-connectDB();
+// Connect DB
+const db = require('./config/db');
+
+// Test DB
+db.authenticate()
+  .then(() => console.log('Database Connected....'.cyan.bold.underline))
+  .catch((err) => console.log('Error: ' + err));
 
 //Route Files
 const orders = require('./routes/orders');
@@ -22,7 +26,7 @@ app.use(express.json());
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
+  app.use(morgan('dev'));
 }
 
 //Sanitize data
@@ -42,16 +46,15 @@ app.use('/users', users);
 const PORT = process.env.PORT || 3000;
 
 app.listen(
-    PORT,
-    console.log(
-        `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow
-            .bold
-    )
+  PORT,
+  console.log(
+    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
+  )
 );
 
 //Handle unhandled promise rejection
 process.on('unhandledRejection', (err, promise) => {
-    console.log(`Error: ${err.message}`.red);
-    //Close server & exit process
-    // server.close(() => process.exit());
+  console.log(`Error: ${err.message}`.red);
+  //Close server & exit process
+  // server.close(() => process.exit());
 });

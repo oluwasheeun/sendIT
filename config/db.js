@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 
-const connectDB = async () => {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useUnifiedTopology: true,
-    });
+module.exports = new Sequelize('sendIT', 'postgres', 'pelumi', {
+  host: 'localhost',
+  dialect: 'postgres',
+  port: 5000,
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline.bold);
-};
-
-module.exports = connectDB;
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+});

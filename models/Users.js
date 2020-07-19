@@ -1,58 +1,68 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
+const db = require('../config/db');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
-const UserSchema = new mongoose.Schema({
+const User = db.define(
+  'users',
+  {
+    id: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.UUIDV1,
+      primaryKey: true,
+    },
     firstName: {
-        type: String,
-        required: [true, 'Please add first name'],
+      type: Sequelize.STRING,
+      allowNull: false,
     },
     lastName: {
-        type: String,
-        required: [true, 'Please add last name'],
+      type: Sequelize.STRING,
+      allowNull: false,
     },
     email: {
-        type: String,
-        required: [true, 'Please add email'],
-        unique: true,
-        match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            'Please add a valid email',
-        ],
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: {
+        args: 'email',
+        msg: 'The email is already taken!',
+      },
+      validate: {
+        isEmail: true,
+        is: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/],
+      },
     },
     role: {
-        type: String,
-        enum: ['user', 'admin'],
-        default: 'user',
+      type: Sequelize.ENUM(),
+      values: ['user', 'admin'],
+      defaultValue: 'user',
+      validate: {
+        isIn: [['user', 'admin']],
+      },
     },
     password: {
-        type: String,
-        required: [true, 'Please add a password'],
-        minlength: 8,
-        select: false,
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        len: {
+          args: [8, 32],
+          msg: 'Password must be upto 8 characters and less than 32 characters',
+        },
+      },
     },
-    resetPasswordToken: String,
-    resetPasswordExpire: Date,
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
+  }
+  // {
+  //   defaultScope: {
+  //     attributes: { exclude: ['password'] },
+  //   },
+  // }
+);
 
 // Encrypt password using bcrypt
-UserSchema.pre('save', async function (next) {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+User.beforeCreate(async (user, options) => {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(user.password, salt);
+  user.password = hashedPassword;
 });
 
-//Send JWT and return
-UserSchema.methods.getSignedJwtToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_SECRET);
-};
+User.sync().then(() => console.log('Table created'));
 
-//match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-};
-
-module.exports = mongoose.model('User', UserSchema);
+module.exports = User;
